@@ -1,4 +1,4 @@
-from operator import itemgetter
+import locale
 
 from django_countries.conf import settings
 
@@ -49,7 +49,19 @@ class Countries(object):
         Each country record consists of a tuple of the two letter ISO3166-1
         country code and short name.
         """
-        return iter(sorted(self.countries, key=itemgetter(1)))
+
+        # Store the  old locale
+        old_locale = locale.setlocale(locale.LC_COLLATE)
+        locale.setlocale(locale.LC_COLLATE, "")
+
+        # Evaluate the translations
+        sorted_countries = sorted(self.countries, key=lambda x: x[1][:],
+                                  cmp=locale.strcoll)
+
+        # restore the restore the old locale
+        locale.setlocale(locale.LC_COLLATE, old_locale)
+
+        return iter(sorted_countries)
 
     def name(self, code):
         """
